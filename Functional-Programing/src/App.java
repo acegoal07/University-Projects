@@ -1,3 +1,6 @@
+import lib.Module;
+import lib.Student;
+
 public class App {
    public static void main(String[] args) {
       // Creates a new register for the students
@@ -20,10 +23,10 @@ public class App {
          new Student(
             "joe",
             "bog",
-            18,
-            10,
-            6,
-            2005,
+            20,
+            19,
+            1,
+            2004,
             8493,
             "Computer Science",
             new Module[]{
@@ -32,17 +35,21 @@ public class App {
          )
       );
       // Prints out the register
-      System.out.println(register.returnRegister());
-      // Prints out student using search
-      Student student = register.searchStudentByID(1654);
-      if (student != null) {
-         System.out.println(student.returnDetails());
-      } else {
-         System.out.println("Student not found");
-      }
-      register.searchStudentByAge(18, 0).forEach(i -> System.out.println(i.returnBirthday()));
-      register.searchStudentByCourse("Computer Science", 0).forEach(i -> System.out.println(i.returnName()));
-      register.searchStudentByModule("test", 0).forEach(i -> System.out.println(i.returnIdNumber()));
+      // System.out.println(register.returnRegister());
+      // // Prints out student using search
+      // Student student = register.searchStudentByID(1654);
+      // if (student != null) {
+      //    System.out.println(student.returnDetails());
+      // } else {
+      //    System.out.println("Student not found");
+      // }
+      // register.searchStudentByAge(18, 0).forEach(i -> System.out.println(i.returnBirthday()));
+      // register.searchStudentByCourse("Computer Science", 0).forEach(i -> System.out.println(i.returnName()));
+      // register.searchStudentByModule("test", 0).forEach(i -> System.out.println(i.returnIdNumber()));
+
+      
+      register.sortByBirthday(true, null).forEach(i -> System.out.println(i.returnBirthday()));
+
       // Removes student
       // register.removeStudentByID(1654);
       // register.bulkRemoveStudentsByID(1654, 8493);
