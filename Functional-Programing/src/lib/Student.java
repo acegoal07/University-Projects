@@ -36,15 +36,15 @@ public class Student {
      * @param modulesInput    The modules the student is on
      */
     public Student(
-            String fNameInput,
-            String sNameInput,
-            Integer ageInput,
-            Integer birthDayInput,
-            Integer birthMonthInput,
-            Integer birthYearInput,
-            Integer idNumberInput,
-            CourseType courseInput,
-            Module[] modulesInput
+        String fNameInput,
+        String sNameInput,
+        Integer ageInput,
+        Integer birthDayInput,
+        Integer birthMonthInput,
+        Integer birthYearInput,
+        Integer idNumberInput,
+        CourseType courseInput,
+        Module[] modulesInput
     ) {
         fName = fNameInput;
         sName = sNameInput;
@@ -146,7 +146,7 @@ public class Student {
      * @return The students modules
      */
     public Module[] returnModules() {
-        return modules;
+        return Arrays.copyOf(modules, modules.length);
     }
 
     /**

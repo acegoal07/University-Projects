@@ -1,4 +1,8 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
 
 import lib.Student;
 import lib.Module.ModuleCode;
@@ -26,6 +30,8 @@ public class Register {
         for (Student student : students) {
             if (Boolean.FALSE.equals(checkIfStudentExists(student.returnIdNumber()))) {
                 studentRegister.add(student);
+            } else {
+                System.out.println("Student with ID " + student.returnIdNumber() + " already exists");
             }
         }
     }
@@ -48,27 +54,36 @@ public class Register {
         Arrays.stream(idNumberInput).forEach(this::removeStudentByID);
     }
 
-/////////// RETURNING ///////////
-
-    /**
-     * Used to return a copy of the register
-     *
-     * @return A copy of the register
-     */
-    public List<Student> returnRegister() {
-        return new ArrayList<>(studentRegister);
-    }
+/////////// Checks ///////////
 
     /**
      * Used to check whether a student exists in the register
      *
      * @param idNumberInput The ID number of the student you want to check for
+     * @return Whether the student exists
      */
     public Boolean checkIfStudentExists(int idNumberInput) {
-        return studentRegister.stream().anyMatch(s -> s.returnIdNumber().equals(idNumberInput));
+        return studentRegister.stream()
+            .anyMatch(s -> s.returnIdNumber()
+                .equals(idNumberInput)
+            );
     }
 
-/////////// SEARCHING ///////////   
+/////////// SEARCHING ///////////
+
+    /**
+     * Used to get all students on a specific module
+     * 
+     * @param predicate The predicate you want to use to search for students
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students on the module
+     */
+    public List<Student> search(Predicate<Student> predicate, int limit) {
+        return studentRegister.stream()
+            .filter(predicate)
+            .limit(limit == 0 ? Long.MAX_VALUE : limit)
+            .toList();
+    }
 
     /**
      * Used to search for a student by ID
@@ -77,44 +92,101 @@ public class Register {
      * @return The student you searched for
      */
     public Student searchStudentByID(int idNumberInput) {
-        Optional<Student> returnStudent = studentRegister.stream().filter(s -> s.returnIdNumber().equals(idNumberInput)).limit(1).findFirst();
-        return returnStudent.orElse(null);
-    }
-
-    /**
-     * Used to get all students of a specific age
-     *
-     * @param ageInput The age you want to search for
-     * @param limit    The maximum amount of students you want to return (0 for no limit)
-     * @return The students of the age
-     */
-    public List<Student> searchStudentByAge(int ageInput, int limit) {
-        return studentRegister.stream().filter(s -> s.returnAge() == ageInput).limit(limit == 0 ? Long.MAX_VALUE : limit).toList();
-    }
-
-    /**
-     * Used to get all students on a specific course
-     *
-     * @param courseInput The course you want to search for
-     * @param limit       The maximum amount of students you want to return (0 for no limit)
-     * @return The students on the course
-     */
-    public List<Student> searchStudentByCourse(CourseType courseInput, int limit) {
-        return studentRegister.stream().filter(s -> s.returnCourse() == courseInput).limit(limit == 0 ? Long.MAX_VALUE : limit).toList();
+        return search(s -> s.returnIdNumber() == idNumberInput, 1).get(0);
     }
 
     /**
      * Used to get all students on a specific module
      *
      * @param moduleCodeInput The module code of the module you want to search for
-     * @param limit           The maximum amount of students you want to return
+     * @param limit The maximum amount of students you want to return
      * @return The students on the module
      */
     public List<Student> searchStudentByModule(ModuleCode moduleCodeInput, int limit) {
-        return studentRegister.stream().filter(s -> Arrays.asList(s.returnModulesCodes()).contains(moduleCodeInput.toString())).limit(limit == 0 ? Long.MAX_VALUE : limit).toList();
+        return search(s -> Arrays.stream(s.returnModulesCodes())
+            .anyMatch(mc -> mc == moduleCodeInput), limit);
+    }
+
+    /**
+     * Used to get all students of a specific age
+     *
+     * @param ageInput The age you want to search for
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students of the age
+     */
+    public List<Student> searchStudentByAge(int ageInput, int limit) {
+        return search(s -> s.returnAge() == ageInput, limit);
+    }
+    
+    /**
+     * Used to get all students on a specific course
+     *
+     * @param courseInput The course you want to search for
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students on the course
+     */
+    public List<Student> searchStudentByCourse(CourseType courseInput, int limit) {
+        return search(s -> s.returnCourse() == courseInput, limit);
+    }
+
+    /**
+     * Used to get all students of a specific first name
+     *
+     * @param firstNameInput The first name you want to search for
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students of the first name
+     */
+    public List<Student> searchStudentByFirstName(String firstNameInput, int limit) {
+        return search(s -> s.returnFirstName().equals(firstNameInput), limit);
+    }
+
+    /**
+     * Used to get all students of a specific last name
+     *
+     * @param lastNameInput The last name you want to search for
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students of the last name
+     */
+    public List<Student> searchStudentByLastName(String lastNameInput, int limit) {
+        return search(s -> s.returnLastName().equals(lastNameInput), limit);
+    }
+
+    /**
+     * Used to get all students of a specific full name
+     *
+     * @param fullNameInput The full name you want to search for
+     * @param limit The maximum amount of students you want to return (0 for no limit)
+     * @return The students of the full name
+     */
+    public List<Student> searchStudentByFullName(String fullNameInput, int limit) {
+        return search(s -> s.returnName().equals(fullNameInput), limit);
     }
 
 /////////// SORTING ///////////
+
+    /**
+     * Used to sort the register by a given comparator
+     * @param descending Whether you want the register to be sorted in descending order
+     * @param studentList The list of students you want to sort
+     * @param comparator The comparator you want to use to sort the register
+     * @return The sorted register
+     */
+    public List<Student> sort(boolean descending, List<Student> studentList, Comparator<Student> comparator) {
+        return (studentList != null ? studentList : studentRegister).stream()
+            .sorted(descending ? comparator.reversed() : comparator)
+            .toList();
+    }
+
+    /**
+     * Used to sort the register by ID in ascending or descending order
+     *
+     * @param descending  Whether you want the register to be sorted in descending order
+     * @param studentList The list of students you want to sort
+     * @return The sorted register
+     */
+    public List<Student> sortByID(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnIdNumber));
+    }
 
     /**
      * Used to sort the register by full name in ascending or descending order
@@ -123,12 +195,8 @@ public class Register {
      * @param studentList The list of students you want to sort
      * @return The sorted register
      */
-    public List<Student> sortByFullName(Boolean descending, List<Student> studentList) {
-        if (studentList != null) {
-            return studentList.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnName().compareTo(s1.returnName())) : (Comparator.comparing(Student::returnName))).toList();
-        } else {
-            return studentRegister.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnName().compareTo(s1.returnName())) : (Comparator.comparing(Student::returnName))).toList();
-        }
+    public List<Student> sortByFullName(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnName));
     }
 
     /**
@@ -138,12 +206,8 @@ public class Register {
      * @param studentList The list of students you want to sort
      * @return The sorted register
      */
-    public List<Student> sortByFirstName(Boolean descending, List<Student> studentList) {
-        if (studentList != null) {
-            return studentList.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnFirstName().compareTo(s1.returnFirstName())) : (Comparator.comparing(Student::returnFirstName))).toList();
-        } else {
-            return studentRegister.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnFirstName().compareTo(s1.returnFirstName())) : (Comparator.comparing(Student::returnFirstName))).toList();
-        }
+    public List<Student> sortByFirstName(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnFirstName));
     }
 
     /**
@@ -153,12 +217,8 @@ public class Register {
      * @param studentList The list of students you want to sort
      * @return The sorted register
      */
-    public List<Student> sortByLastName(Boolean descending, List<Student> studentList) {
-        if (studentList != null) {
-            return studentList.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnLastName().compareTo(s1.returnLastName())) : (Comparator.comparing(Student::returnLastName))).toList();
-        } else {
-            return studentRegister.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnLastName().compareTo(s1.returnLastName())) : (Comparator.comparing(Student::returnLastName))).toList();
-        }
+    public List<Student> sortByLastName(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnLastName));
     }
 
     /**
@@ -168,12 +228,8 @@ public class Register {
      * @param studentList The list of students you want to sort
      * @return The sorted register
      */
-    public List<Student> sortByAge(Boolean descending, List<Student> studentList) {
-        if (studentList != null) {
-            return studentList.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnAge().compareTo(s1.returnAge())) : (Comparator.comparing(Student::returnAge))).toList();
-        } else {
-            return studentRegister.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnAge().compareTo(s1.returnAge())) : (Comparator.comparing(Student::returnAge))).toList();
-        }
+    public List<Student> sortByAge(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnAge));
     }
 
     /**
@@ -183,11 +239,7 @@ public class Register {
      * @param studentList The list of students you want to sort
      * @return The sorted register
      */
-    public List<Student> sortByBirthday(Boolean descending, List<Student> studentList) {
-        if (studentList != null) {
-            return studentList.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnBirthday().compareTo(s1.returnBirthday())) : (Comparator.comparing(Student::returnBirthday))).toList();
-        } else {
-            return studentRegister.stream().sorted(Boolean.TRUE.equals(descending) ? ((s1, s2) -> s2.returnBirthday().compareTo(s1.returnBirthday())) : (Comparator.comparing(Student::returnBirthday))).toList();
-        }
+    public List<Student> sortByBirthday(boolean descending, List<Student> studentList) {
+        return sort(descending, studentList, Comparator.comparing(Student::returnBirthday));
     }
 }
